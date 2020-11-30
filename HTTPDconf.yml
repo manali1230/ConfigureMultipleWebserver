@@ -1,0 +1,55 @@
+- hosts: all
+  vars_prompt: 
+  -  name: foldername
+     prompt: " Enter your Directory Name "
+     private: no
+
+  tasks:
+  -  file:
+       state: directory
+       path: "{{foldername}}"
+
+  - mount:
+      src: "/dev/cdrom"
+      path: "{{foldername}}"
+      state: mounted
+      fstype: "iso9660"
+
+  - yum_repository:
+      baseurl: "{{foldername}}/AppStream"
+      name: "myappstream"
+      description: "My AppStream Packages"
+      gpgcheck: no
+
+  - yum_repository:
+      baseurl: "{{foldername}}/BaseOS"
+      name: "myBaseOS"
+      description: "My BaseOS Packages"
+      gpgcheck: no
+
+  - package:
+      name: "httpd"
+      state: present
+
+  - copy:
+      dest: "/etc/httpd/conf.d/configurefile.conf"
+      src: "configurefile.conf"
+
+  -  file:
+       state: directory
+       path: "/var/www/manali"
+
+  - copy:
+      dest: "/var/www/manali/index.html"
+      content: "hello this is manali's page \n"
+
+  - service:
+      name: "httpd"
+      state: restarted
+      enabled: yes
+
+  - firewalld:
+      port: 8080/tcp
+      state: enabled
+      permanent: yes
+      immediate: yes
