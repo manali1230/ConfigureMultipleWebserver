@@ -4,6 +4,15 @@
      prompt: " Enter your Directory Name "
      private: no
 
+  -  name: confdirectory
+     prompt: " Enter your Configuration Directory Name "
+     private: no
+
+  -  name: portno
+     prompt: " Enter your port number "
+     private: no
+
+
   tasks:
   -  file:
        state: directory
@@ -31,17 +40,17 @@
       name: "httpd"
       state: present
 
-  - copy:
+  - template:
       dest: "/etc/httpd/conf.d/configurefile.conf"
       src: "configurefile.conf"
 
   -  file:
        state: directory
-       path: "/var/www/manali"
+       path: "/var/www/{{confdirectory}}"
 
-  - copy:
-      dest: "/var/www/manali/index.html"
-      content: "hello this is manali's page \n"
+  - template:
+      dest: "/var/www/{{confdirectory}}/index.html"
+      src: "index.html"
 
   - service:
       name: "httpd"
@@ -49,7 +58,7 @@
       enabled: yes
 
   - firewalld:
-      port: 8080/tcp
+      port: "{{portno}}/tcp"
       state: enabled
       permanent: yes
       immediate: yes
